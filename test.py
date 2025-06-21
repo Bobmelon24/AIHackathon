@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 def fetch_latest_tweets(account, count=5):
-    url = f"https://mobile.twitter.com/{account.strip('@')}"
+    url = f"https://x.com/{account.strip('@')}"
     headers = {"User-Agent": "Mozilla/5.0"}
 
     response = requests.get(url, headers=headers)
