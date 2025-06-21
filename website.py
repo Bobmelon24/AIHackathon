@@ -37,8 +37,8 @@ def save_email(email_entry):
 with st.form("subscription_form"):
     email = st.text_input("Email Address")
     category = st.selectbox("Select News Category", [
-        "business", "entertainment", "general", "health", "science", "sports", "technology"
-    ])
+        "Business", "Entertainment", "General", "Health", "Science", "Sports", "Technology"
+    ]).lower()
     submit = st.form_submit_button("Subscribe")
 
     if submit:
