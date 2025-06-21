@@ -6,6 +6,9 @@ import json
 from datetime import datetime
 today = datetime.today().strftime("%B %d, %Y")
 
+from dotenv import load_dotenv
+load_dotenv()
+
 api_key = os.getenv("NEWSAPI_API_KEY")  # Must be set in environment
 EMAILS_FILE = "emails.json"
 
@@ -57,6 +60,8 @@ def send_email(recipient, category, articles_html):
         smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
         smtp.send_message(msg)
 
+import time  # Add at top if not already imported
+
 def main():
     subscribers = load_subscribers()
     grouped = {}
@@ -65,11 +70,17 @@ def main():
         grouped.setdefault(key, None)
 
     for (email, category) in grouped:
-        articles, urls = fetch_news(category)
-        if not articles:
-            continue
-        html = format_articles(articles, urls)
-        send_email(email, category, html)
+        print(f"[INFO] Processing {email} | {category}")
+        try:
+            articles, urls = fetch_news(category)  # triggers Gemini
+            if not articles:
+                continue
+            html = format_articles(articles, urls)
+            send_email(email, category, html)
+        except Exception as e:
+            print(f"[ERROR] Failed to process {email}: {e}")
+        time.sleep(7)  
+    
 
 if __name__ == "__main__":
     main()
