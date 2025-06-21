@@ -22,9 +22,6 @@ BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 client = tweepy.Client(bearer_token=BEARER_TOKEN)
 '''
 
-from news_fetcher import get_articles
-articles = get_articles()
-
 import google.generativeai as genai
 
 # Summarize using Google Gemini
@@ -35,7 +32,16 @@ def summarize_text(text):
     response = model.generate_content(prompt)
     return response.text.strip()
 
-print(summarize_text(articles[list(articles.keys())[0]]))
+
+from news_fetcher import get_articles
+
+# Get summaries for all articles
+def get_article_summaries(category='general'):
+    articles, urls = get_articles(category)
+    summaries = {}
+    for title, content in articles.items():
+        summaries[title] = summarize_text(content)
+    return summaries, urls
 
 '''
 # Post back to Twitter
