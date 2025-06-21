@@ -12,7 +12,7 @@ EMAILS_FILE = "emails.json"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 465
 SENDER_EMAIL = "daily.news.ai.agent@gmail.com"
-SENDER_PASSWORD = os.getenv("GOOGLE_APP_PASSWORD")
+SENDER_PASSWORD = "eppkppdojwpbtpis"
 def load_subscribers():
     if not os.path.exists(EMAILS_FILE):
         return []
