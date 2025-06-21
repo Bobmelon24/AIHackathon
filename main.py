@@ -25,7 +25,7 @@ def fetch_latest_tweets(account, count=5):
 def summarize_text(text):
     import google.generativeai as genai
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    prompt = f"Summarize the following tweet in 1–2 sentences, keeping the core news and neutral tone:\n\n{text}\n\nSummary:"
+    prompt = f"Summarize the following tweet in 1–2 sentences, keeping the core information and neutral tone, with no bias:\n\n{text}\n\nSummary:"
     model = genai.GenerativeModel("gemini-pro")
     response = model.generate_content(prompt)
     return response.text.strip()
