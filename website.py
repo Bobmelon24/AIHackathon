@@ -23,7 +23,7 @@ def entry_exists(email_entry, emails):
         for entry in emails
     )
 
-'''
+
 def save_email(email_entry):
     emails = load_emails()
     if not entry_exists(email_entry, emails):
@@ -33,6 +33,8 @@ def save_email(email_entry):
         return True
     else:
         return False
+
+# Encryption for emails, will fix later
 '''
 from email_encryption import load_emails_encrypted, save_emails_encrypted
 
@@ -47,6 +49,7 @@ def save_email(entry):
         save_emails_encrypted(emails)
         return True
     return False
+'''
 
 # Form input
 with st.form("subscription_form"):
