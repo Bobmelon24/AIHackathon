@@ -1,24 +1,29 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("NEWSAPI_API_KEY")
+
 from newsapi import NewsApiClient
 
 import requests
 from bs4 import BeautifulSoup
 
 def extract_article_text(url):
-    headers = {"User-Agent": "Mozilla/5.0"}
+    headers = {"User-Agent": "Mozilla/5.0"}          # Looks like normal request
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return "Failed to load article."
 
+    # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Try extracting paragraphs (adjust tag/class for specific sites)
     paragraphs = soup.find_all('p')
     article_text = "\n".join(p.get_text() for p in paragraphs)
     
     return article_text.strip()
 
 
-api = NewsApiClient(api_key='3e8305ecc71f418c8ef844ec285bbea8')
+api = NewsApiClient(api_key=api_key)
 
 # Get data
 data = api.get_top_headlines(
@@ -36,10 +41,3 @@ for article in data["articles"]:
     title_ascii = article["title"].encode("ascii", "ignore").decode()
     content = extract_article_text(article["url"])
     articles[title_ascii] = content
-
-#for article in data["articles"]:
-#    print(f"- {article['title'].encode("ascii", "ignore").decode()}")
-#    full_text = extract_article_text(article['url'])
-#    print(full_text)
-
-
