@@ -1,0 +1,11 @@
+os
+dotenv
+newsapi
+newsapi-python
+requests
+bs4
+smtplib
+email.message
+json
+datetime
+google.generativeai

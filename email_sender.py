@@ -1,6 +1,5 @@
 import smtplib
 from email.message import EmailMessage
-import requests
 import os
 import json
 
