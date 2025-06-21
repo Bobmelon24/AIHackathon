@@ -23,7 +23,7 @@ client = tweepy.Client(bearer_token=BEARER_TOKEN)
 '''
 
 from news_fetcher import get_articles
-articles = get_articles()
+articles, urls = get_articles()
 
 import google.generativeai as genai
 
@@ -35,7 +35,12 @@ def summarize_text(text):
     response = model.generate_content(prompt)
     return response.text.strip()
 
-print(summarize_text(articles[list(articles.keys())[0]]))
+# Get summaries for all articles
+def get_article_summaries(articles=articles):
+    summaries = {}
+    for title, content in articles.items():
+        summaries[title] = summarize_text(content)
+    return summaries
 
 '''
 # Post back to Twitter

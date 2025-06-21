@@ -35,11 +35,13 @@ def get_articles():
         page_size=5
     )
 
-    # Sort data into articles disctionary
+    # Sort data and urls into articles and urls disctionary
     articles = {}
+    urls = {}
     for article in data["articles"]:
         title_ascii = article["title"].encode("ascii", "ignore").decode()
         content = extract_article_text(article["url"])
         articles[title_ascii] = content
+        urls[title_ascii] = article["url"]
 
-    return articles
+    return articles, urls
