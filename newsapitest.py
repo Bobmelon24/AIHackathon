@@ -1,16 +1,16 @@
-import requests
+from newsapi import NewsApiClient
 
-url = "https://newsapi.org/v2/everything"
-params = {
-    "q": "TikTok",
-    "sortBy": "publishedAt",
-    "apiKey": "3e8305ecc71f418c8ef844ec285bbea8",
-    "pageSize": 5,
-}
-response = requests.get(url, params=params)
-data = response.json()
+api = NewsApiClient(api_key='3e8305ecc71f418c8ef844ec285bbea8')
 
-#print(data)
+data = api.get_top_headlines(
+    q='AI',
+    #sources='bbc-news',
+    category='general',       # business, entertainment, general, health, science, sports, technology
+    language='en',
+    country='us',
+    page_size=5
+)
 
 for article in data["articles"]:
-    print(f"- {article['title']}")
+    print(f"- {article['title'].encode("ascii", "ignore").decode()}")
+
