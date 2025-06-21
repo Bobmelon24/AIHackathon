@@ -1,4 +1,5 @@
 import tweepy, os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -7,8 +8,8 @@ load_dotenv()
 auth = tweepy.OAuth1UserHandler(
     os.getenv("TWITTER_API_KEY"),
     os.getenv("TWITTER_SECRET_API_KEY"),
-    os.getenv("TWITTER_CLIENT_ID"),
-    os.getenv("TWITTER_CLIENT_SECRET")
+    os.getenv("TWITTER_ACCESS_KEY"),
+    os.getenv("TWITTER_ACCESS_SECRET_KEY")
 )
 api = tweepy.API(auth)
 
@@ -35,6 +36,17 @@ def post_summary(summary, source_account):
     formatted = f"📢 Summary of @{source_account}'s latest post:\n\n{summary}\n\n#news #AIagent"
     api.update_status(formatted)
 
+# Test Fetching Tweets
+def test_fetch_latest_tweets():
+    for account in accounts:
+        print(f"Fetching tweets for {account}...")
+        tweets = fetch_latest_tweets(account, count=1)
+        print(f"Latest tweets from {account}:")
+        for tweet in tweets:
+            print(f"- {tweet}")
+
+# Run the test
+test_fetch_latest_tweets()
 '''
 # Automation Loop
 import schedule, time
