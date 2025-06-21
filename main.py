@@ -20,20 +20,14 @@ def fetch_latest_tweets(account, count=5):
     return [t.full_text for t in tweets if not t.full_text.startswith("RT")]
 
 
-# Summarize using openai
-# Update for gemini
-import openai
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
+# Summarize using Google Gemini
 def summarize_text(text):
+    import google.generativeai as genai
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
     prompt = f"Summarize the following tweet in 1–2 sentences, keeping the core news and neutral tone:\n\n{text}\n\nSummary:"
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.5
-    )
-    return response["choices"][0]["message"]["content"].strip()
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    return response.text.strip()
 
 
 # Post back to Twitter
