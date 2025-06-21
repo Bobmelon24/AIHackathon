@@ -92,13 +92,13 @@ def run_scraper():
         time.sleep(2)
     write_tweets_to_csv(all_tweets)
     print(f"✅ Stored {len(all_tweets)} tweets at {datetime.utcnow().isoformat()} UTC.")
-
+'''
 if __name__ == "__main__":
     while True:
         run_scraper()
         print("⏳ Waiting 16 minutes before next run...\n")
         time.sleep(16 * 60)  # wait 960 seconds (16 minutes)
-
+'''
 
 
 # Summarize using Google Gemini
