@@ -1,4 +1,5 @@
-import tweepy, os
+import tweepy
+import os
 
 from dotenv import load_dotenv
 
@@ -14,11 +15,46 @@ auth = tweepy.OAuth1UserHandler(
 api = tweepy.API(auth)
 
 accounts = ["@AP", "@Reuters", "@BBCBreaking"]
+# Get the bearer token from env
+BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
-# Fetch Recent Tweets
-def fetch_latest_tweets(account, count=5):
-    tweets = api.user_timeline(screen_name=account, count=count, tweet_mode="extended", exclude_replies=True)
-    return [t.full_text for t in tweets if not t.full_text.startswith("RT")]
+# Initialize Tweepy client using bearer token
+client = tweepy.Client(bearer_token=BEARER_TOKEN)
+
+def fetch_latest_tweets(account_username, count=5):
+    try:
+        # Get user ID
+        user = client.get_user(username=account_username)
+        user_id = user.data.id
+
+        # Get latest tweets
+        tweets = client.get_users_tweets(
+            id=user_id,
+            max_results=count,
+            exclude=["retweets", "replies"],
+            tweet_fields=["text"]
+        )
+
+        if not tweets.data:
+            return []
+
+        return [tweet.text for tweet in tweets.data]
+
+    except Exception as e:
+        print(f"Error fetching tweets for @{account_username}: {e}")
+        return []
+
+# Test function
+def test_fetch_latest_tweets():
+    account = "AP"
+    print(f"Fetching tweets for @{account}...")
+    tweets = fetch_latest_tweets(account, count=3)
+    for i, tweet in enumerate(tweets, 1):
+        print(f"\nTweet {i}:\n{tweet}")
+
+if __name__ == "__main__":
+    test_fetch_latest_tweets()
+
 
 
 # Summarize using Google Gemini
@@ -45,8 +81,6 @@ def test_fetch_latest_tweets():
         for tweet in tweets:
             print(f"- {tweet}")
 
-# Run the test
-test_fetch_latest_tweets()
 '''
 # Automation Loop
 import schedule, time
@@ -64,5 +98,4 @@ schedule.every(30).minutes.do(summarize_and_post)
 while True:
     schedule.run_pending()
     time.sleep(1)
-
 '''
