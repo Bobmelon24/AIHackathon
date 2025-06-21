@@ -61,12 +61,12 @@ def fetch_latest_tweets(account_username, count=5):
     except TooManyRequests as e:
         reset_time = int(e.response.headers.get("x-rate-limit-reset", time.time() + 60))
         wait_time = max(0, reset_time - int(time.time()))
-        print(f"🚫 Rate limit hit. Waiting {wait_time} seconds...")
+        print(f"Rate limit hit. Waiting {wait_time} seconds...")
         time.sleep(wait_time + 1)
         return fetch_latest_tweets(account_username, count)
 
     except BadRequest as e:
-        print(f"❌ Bad request for @{account_username}: {e}")
+        print(f"Bad request for @{account_username}: {e}")
         return []
 
     except Exception as e:
