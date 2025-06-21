@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 auth = tweepy.OAuth1UserHandler(
-    os.getenv("API_KEY"),
-    os.getenv("SECRET_API_KEY"),
-    os.getenv("CLIEND_ID"),
-    os.getenv("CLIENT_SECRET")
+    os.getenv("TWITTER_API_KEY"),
+    os.getenv("TWITTER_SECRET_API_KEY"),
+    os.getenv("TWITTER_CLIENT_ID"),
+    os.getenv("TWITTER_CLIENT_SECRET")
 )
 api = tweepy.API(auth)
