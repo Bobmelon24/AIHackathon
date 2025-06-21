@@ -2,7 +2,7 @@ name: Daily News Sender
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Runs every hour; change to "0 8 * * *" for daily at 8AM UTC
+    - cron: "*/3 * * * *"
   workflow_dispatch:
 
 jobs:
