@@ -1,6 +1,8 @@
 import tweepy
 import os
+import time
 
+from tweepy.errors import TooManyRequests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,13 +23,20 @@ BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 # Initialize Tweepy client using bearer token
 client = tweepy.Client(bearer_token=BEARER_TOKEN)
 
+# Cache usernames to user IDs to avoid rate limits on get_user
+USER_ID_CACHE = {}
+
 def fetch_latest_tweets(account_username, count=5):
     try:
-        # Get user ID
-        user = client.get_user(username=account_username)
-        user_id = user.data.id
+        # Use cache to avoid calling get_user too often
+        if account_username not in USER_ID_CACHE:
+            user = client.get_user(username=account_username)
+            USER_ID_CACHE[account_username] = user.data.id
+            time.sleep(1)  # minor delay to reduce pressure
 
-        # Get latest tweets
+        user_id = USER_ID_CACHE[account_username]
+
+        # Get tweets from user timeline
         tweets = client.get_users_tweets(
             id=user_id,
             max_results=count,
@@ -40,17 +49,26 @@ def fetch_latest_tweets(account_username, count=5):
 
         return [tweet.text for tweet in tweets.data]
 
+    except TooManyRequests as e:
+        reset_time = int(e.response.headers.get("x-rate-limit-reset", time.time() + 60))
+        wait_time = max(0, reset_time - int(time.time()))
+        print(f"🚫 Rate limit hit. Waiting {wait_time} seconds...")
+        time.sleep(wait_time + 1)
+        return fetch_latest_tweets(account_username, count)  # retry after wait
+
     except Exception as e:
         print(f"Error fetching tweets for @{account_username}: {e}")
         return []
 
 # Test function
 def test_fetch_latest_tweets():
-    account = "AP"
-    print(f"Fetching tweets for @{account}...")
-    tweets = fetch_latest_tweets(account, count=3)
-    for i, tweet in enumerate(tweets, 1):
-        print(f"\nTweet {i}:\n{tweet}")
+    accounts = ["AP", "BBCBreaking", "CNN"]  # You can test multiple accounts here
+    for account in accounts:
+        print(f"\nFetching tweets for @{account}...")
+        tweets = fetch_latest_tweets(account, count = 5)  # valid range is 5–100)
+        for i, tweet in enumerate(tweets, 1):
+            print(f"\nTweet {i}:\n{tweet}")
+        time.sleep(2)  # Throttle between accounts
 
 if __name__ == "__main__":
     test_fetch_latest_tweets()
