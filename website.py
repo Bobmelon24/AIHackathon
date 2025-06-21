@@ -16,12 +16,22 @@ def load_emails():
         except json.JSONDecodeError:
             return []  # Return empty list if file is empty or malformed
 
+def entry_exists(email_entry, emails):
+    return any(
+        entry["email"].lower() == email_entry["email"].lower() and
+        entry["category"].lower() == email_entry["category"].lower()
+        for entry in emails
+    )
 
 def save_email(email_entry):
     emails = load_emails()
-    emails.append(email_entry)
-    with open(EMAILS_FILE, "w") as f:
-        json.dump(emails, f, indent=2)
+    if not entry_exists(email_entry, emails):
+        emails.append(email_entry)
+        with open(EMAILS_FILE, "w") as f:
+            json.dump(emails, f, indent=2)
+        return True
+    else:
+        return False
 
 # Form input
 with st.form("subscription_form"):
@@ -36,5 +46,8 @@ with st.form("subscription_form"):
             st.error("Please enter a valid email address.")
         else:
             entry = {"email": email, "category": category}
-            save_email(entry)
-            st.success(f"Subscription saved for {email} with category '{category}'.")
+            added = save_email(entry)
+            if added:
+                st.success(f"Subscription saved for {email} with category '{category}'.")
+            else:
+                st.info(f"{email} is already subscribed to category '{category}'.")
