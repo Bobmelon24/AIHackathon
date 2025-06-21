@@ -22,14 +22,20 @@ BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 client = tweepy.Client(bearer_token=BEARER_TOKEN)
 '''
 
+from news_fetcher import get_articles
+articles = get_articles()
+
+import google.generativeai as genai
+
 # Summarize using Google Gemini
 def summarize_text(text):
-    import google.generativeai as genai
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    prompt = f"Summarize the following tweet in 1–2 sentences, keeping the core information and neutral tone, with no bias:\n\n{text}\n\nSummary:"
-    model = genai.GenerativeModel("gemini-pro")
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    prompt = f"Summarize the following article in 1 paragraph that is 4-5 sentences, keeping the core information and neutral tone, with no bias:\n\n{text}\n\nSummary:"
+    model = genai.GenerativeModel("models/gemini-2.5-flash")
     response = model.generate_content(prompt)
     return response.text.strip()
+
+print(summarize_text(articles[list(articles.keys())[0]]))
 
 '''
 # Post back to Twitter

@@ -22,22 +22,24 @@ def extract_article_text(url):
     
     return article_text.strip()
 
+def get_articles():
+    api = NewsApiClient(api_key=api_key)
 
-api = NewsApiClient(api_key=api_key)
+    # Get data
+    data = api.get_top_headlines(
+        #q='AI',
+        #sources='bbc-news',
+        category='general',       # business, entertainment, general, health, science, sports, technology
+        language='en',
+        country='us',
+        page_size=5
+    )
 
-# Get data
-data = api.get_top_headlines(
-    #q='AI',
-    #sources='bbc-news',
-    category='general',       # business, entertainment, general, health, science, sports, technology
-    language='en',
-    country='us',
-    page_size=5
-)
+    # Sort data into articles disctionary
+    articles = {}
+    for article in data["articles"]:
+        title_ascii = article["title"].encode("ascii", "ignore").decode()
+        content = extract_article_text(article["url"])
+        articles[title_ascii] = content
 
-# Sort data into articles disctionary
-articles = {}
-for article in data["articles"]:
-    title_ascii = article["title"].encode("ascii", "ignore").decode()
-    content = extract_article_text(article["url"])
-    articles[title_ascii] = content
+    return articles
