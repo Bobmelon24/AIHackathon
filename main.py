@@ -1,70 +1,77 @@
-#import tweepy
+import smtplib
+from email.message import EmailMessage
+import requests
 import os
-from dotenv import load_dotenv
+import json
 
-load_dotenv()
+from datetime import datetime
+today = datetime.today().strftime("%B %d, %Y")
 
-'''
-# Tweepy Authentication
-auth = tweepy.OAuth1UserHandler(
-    os.getenv("TWITTER_API_KEY"),
-    os.getenv("TWITTER_SECRET_API_KEY"),
-    os.getenv("TWITTER_ACCESS_KEY"),
-    os.getenv("TWITTER_ACCESS_SECRET_KEY")
-)
-api = tweepy.API(auth)
+api_key = os.getenv("NEWSAPI_API_KEY")  # Must be set in environment
+EMAILS_FILE = "emails.json"
 
-accounts = ["@AP", "@Reuters", "@BBCBreaking"]
-# Get the bearer token from env
-BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 465
+SENDER_EMAIL = "daily.news.ai.agent@gmail.com"
+SENDER_PASSWORD = "eppkppdojwpbtpis "  # Use app password for Gmail accounts with 2FA
 
-# Initialize client
-client = tweepy.Client(bearer_token=BEARER_TOKEN)
-'''
+def load_subscribers():
+    if not os.path.exists(EMAILS_FILE):
+        return []
+    with open(EMAILS_FILE, "r") as f:
+        try:
+            data = f.read().strip()
+            if not data:
+                return []  # Empty file → treat as empty list
+            return json.loads(data)
+        except json.JSONDecodeError:
+            return []
 
-import google.generativeai as genai
+from summarizer import get_article_summaries
 
-# Summarize using Google Gemini
-def summarize_text(text):
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-    prompt = f"Summarize the following article in 1 paragraph that is 4-5 sentences, keeping the core information and neutral tone, with no bias:\n\n{text}\n\nSummary:"
-    model = genai.GenerativeModel("models/gemini-2.5-flash")
-    response = model.generate_content(prompt)
-    return response.text.strip()
+def fetch_news(category):
+    return get_article_summaries(category)
 
+def format_articles(articles, urls):
+    lines = []
+    for key in articles:
+        lines.append(f"<b>{key}</b><br>")
+        lines.append(f"{articles[key]}<br>")
+        lines.append(f"<a href='{urls[key]}'>Read more</a><br><br>")
+    return "\n".join(lines)
 
-from news_fetcher import get_articles
+def send_email(recipient, category, articles_html):
+    msg = EmailMessage()
+    msg["Subject"] = f"Daily {category.title()} News: {today}"
+    msg["From"] = SENDER_EMAIL
+    msg["To"] = recipient
+    msg.set_content("Your email client does not support HTML.")
+    msg.add_alternative(f"""\
+    <html>
+      <body>
+        <h3>Here are today's top {category.title()} stories:</h3>
+        {articles_html}
+      </body>
+    </html>
+    """, subtype="html")
 
-# Get summaries for all articles
-def get_article_summaries(category='general'):
-    articles, urls = get_articles(category)
-    summaries = {}
-    for title, content in articles.items():
-        summaries[title] = summarize_text(content)
-    return summaries, urls
+    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as smtp:
+        smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
+        smtp.send_message(msg)
 
-'''
-# Post back to Twitter
-def post_summary(summary, source_account):
-    formatted = f"📢 Summary of @{source_account}'s latest post:\n\n{summary}\n\n#news #AIagent"
-    api.update_status(formatted)
-'''
+def main():
+    subscribers = load_subscribers()
+    grouped = {}
+    for sub in subscribers:
+        key = (sub["email"].lower(), sub["category"].lower())
+        grouped.setdefault(key, None)
 
-'''
-# Automation Loop
-import schedule, time
+    for (email, category) in grouped:
+        articles, urls = fetch_news(category)
+        if not articles:
+            continue
+        html = format_articles(articles, urls)
+        send_email(email, category, html)
 
-def summarize_and_post():
-    for account in accounts:
-        tweets = fetch_latest_tweets(account, count=3)
-        for tweet in tweets:
-            summary = summarize_text(tweet)
-            post_summary(summary, account.strip("@"))
-            time.sleep(10)  # Avoid rate limits
-
-schedule.every(30).minutes.do(summarize_and_post)
-
-while True:
-    schedule.run_pending()
-    time.sleep(1)
-'''
+if __name__ == "__main__":
+    main()
