@@ -24,26 +24,17 @@ def load_subscribers():
         except json.JSONDecodeError:
             return []
 
-def fetch_news(category):
-    url = "https://newsapi.org/v2/top-headlines"
-    params = {
-        "category": category,
-        "language": "en",
-        "pageSize": 5,
-        "apiKey": "3e8305ecc71f418c8ef844ec285bbea8",
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    articles = data.get("articles", [])
-    return articles
+from main import get_article_summaries
 
-def format_articles(articles):
+def fetch_news(category):
+    return get_article_summaries(category)
+
+def format_articles(articles, urls):
     lines = []
-    for article in articles:
-        lines.append(f"<b>{article['title']}</b><br>")
-        if article.get("description"):
-            lines.append(f"{article['description']}<br>")
-        lines.append(f"<a href='{article['url']}'>Read more</a><br><br>")
+    for key in articles:
+        lines.append(f"<b>{key}</b><br>")
+        lines.append(f"{articles[key]}<br>")
+        lines.append(f"<a href='{urls[key]}'>Read more</a><br><br>")
     return "\n".join(lines)
 
 def send_email(recipient, category, articles_html):
@@ -73,10 +64,10 @@ def main():
         grouped.setdefault(key, None)
 
     for (email, category) in grouped:
-        articles = fetch_news(category)
+        articles, urls = fetch_news(category)
         if not articles:
             continue
-        html = format_articles(articles)
+        html = format_articles(articles, urls)
         send_email(email, category, html)
 
 if __name__ == "__main__":

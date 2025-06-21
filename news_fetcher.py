@@ -22,14 +22,14 @@ def extract_article_text(url):
     
     return article_text.strip()
 
-def get_articles():
+def get_articles(category='general'):
     api = NewsApiClient(api_key=api_key)
 
     # Get data
     data = api.get_top_headlines(
         #q='AI',
         #sources='bbc-news',
-        category='general',       # business, entertainment, general, health, science, sports, technology
+        category=category,       # business, entertainment, general, health, science, sports, technology
         language='en',
         country='us',
         page_size=5
