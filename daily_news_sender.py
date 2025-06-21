@@ -4,6 +4,9 @@ import requests
 import os
 import json
 
+from datetime import datetime
+today = datetime.today().strftime("%B %d, %Y")
+
 api_key = os.getenv("NEWSAPI_API_KEY")  # Must be set in environment
 EMAILS_FILE = "emails.json"
 
@@ -39,7 +42,7 @@ def format_articles(articles, urls):
 
 def send_email(recipient, category, articles_html):
     msg = EmailMessage()
-    msg["Subject"] = f"Daily {category.title()} News"
+    msg["Subject"] = f"Daily {category.title()} News: {today}"
     msg["From"] = SENDER_EMAIL
     msg["To"] = recipient
     msg.set_content("Your email client does not support HTML.")
