@@ -35,6 +35,7 @@ def post_summary(summary, source_account):
     formatted = f"📢 Summary of @{source_account}'s latest post:\n\n{summary}\n\n#news #AIagent"
     api.update_status(formatted)
 
+'''
 # Automation Loop
 import schedule, time
 
@@ -52,3 +53,4 @@ while True:
     schedule.run_pending()
     time.sleep(1)
 
+'''
