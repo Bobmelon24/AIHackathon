@@ -34,8 +34,9 @@ from dotenv import load_dotenv
 def get_fernet():
     load_dotenv()
     key = os.getenv("EMAIL_ENCRYPTION_KEY")
+    print(f"[DEBUG] Fernet key raw value: {repr(key)}")
     if not key:
-        raise ValueError("EMAIL_ENCRYPTION_KEY is missing")
+        raise ValueError("EMAIL_ENCRYPTION_KEY is missing or empty")
     return Fernet(key.encode())
 
 def load_emails_encrypted(filepath="emails.json"):
